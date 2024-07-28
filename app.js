@@ -46,10 +46,14 @@ app.post("/create",async(req,res)=>{
 
     jwtoken.verify(token,"blogApp",async (error,decoded)=>{
         if (decoded && decoded.email)  {
-
+try{
             let result=new postModel(input)
             await result.save()
             res.json({"status":"success"})
+}catch(saveError) {
+    console.log('error saving post',saveError)
+    res.status(500).json({"stuats":"error saving post" })
+}
 
 
         } else {
@@ -92,6 +96,34 @@ app.post("/viewall",(req,res)=>{
 
 
 
+//viewMyPost
+
+app.post("/viewmypost",(req,res)=>{
+    let input=req.body
+    let token=req.headers.token
+
+    jwtoken.verify(token,"blogApp",(error,decoded)=>{
+        if (decoded && decoded.email)  {
+
+                postModel.find(input).then(
+                    (items)=>{
+                        res.json(items)
+                    }
+                ).catch(
+            (error)=>{
+                res.json({"status":"error"})
+            }
+        ) 
+        
+
+        }else {
+            res.json({"status":"invalid Authentication"})
+        }
+    })
+
+})
+
+
 
 //signin
 
@@ -119,7 +151,7 @@ app.post("/signin", async (req, res) => {
                     res.json({ "status": "incorrect password" })
                 }
             } else {
-                res.json({ "status": "invalid emailid" })
+                res.json({ "status": "invalid Emailid" })
             }
 
         }
